@@ -1,0 +1,2 @@
+import {NextResponse} from 'next/server';import {serverSupabase} from '../../../lib/supabase-server';
+export async function POST(req:Request){const s=await serverSupabase();const {data:{user}}=await s.auth.getUser();if(!user)return NextResponse.json({error:'Unauthorized'},{status:401});const {published}=await req.json();const {data,error}=await s.from('profiles').update({published}).eq('id',user.id).select().single();return NextResponse.json({data,error})}
