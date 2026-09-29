@@ -1,0 +1,3 @@
+import {NextResponse} from 'next/server';import {serverSupabase} from '../../../lib/supabase-server';
+export async function GET(){const s=await serverSupabase();const {data:{user}}=await s.auth.getUser();if(!user)return NextResponse.json({error:'Unauthorized'},{status:401});const {data,error}=await s.from('resumes').select('data').eq('user_id',user.id).maybeSingle();return NextResponse.json({data:data?.data||null,error})}
+export async function POST(req:Request){const s=await serverSupabase();const {data:{user}}=await s.auth.getUser();if(!user)return NextResponse.json({error:'Unauthorized'},{status:401});const body=await req.json();const {data,error}=await s.from('resumes').upsert({user_id:user.id,data:body}).select().single();return NextResponse.json({data,error})}
