@@ -1,0 +1,39 @@
+name: Restore Project Structure
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore project from ZIP
+        run: |
+          mkdir /tmp/project
+          unzip -q ai-resume-portfolio-builder-netlify.zip -d /tmp/project
+
+          git rm -r --ignore-unmatch .
+
+          ROOT=$(find /tmp/project -mindepth 1 -maxdepth 1 -type d | head -1)
+
+          if [ -n "$ROOT" ] && [ -f "$ROOT/package.json" ]; then
+            cp -a "$ROOT"/. .
+          else
+            cp -a /tmp/project/. .
+          fi
+
+          rm -f ai-resume-portfolio-builder-netlify.zip
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          git commit -m "Restore project structure"
+          git push
